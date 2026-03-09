@@ -1,0 +1,909 @@
+{
+  "info": {
+    "_postman_id": "79cffcc1-9c1f-4219-8924-95fb216aed2d",
+    "name": "НТТР практика Потапов",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "52824979",
+    "_collection_link": "https://go.postman.co/collection/52824979-79cffcc1-9c1f-4219-8924-95fb216aed2d?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "GET - получить все продукты",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "// Pre-request\r",
+              "// (Место для кода, который выполнится до отправки запроса)\r",
+              "\r",
+              "// Post-response\r",
+              "pm.test(\"Статус должен быть 200\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Content-Type = application/json\", function () {\r",
+              "    pm.response.to.have.header(\"Content-Type\", \"application/json; charset=utf-8\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Cache-Control содержит max-age, если присутствует\", function () {\r",
+              "    let cacheHeader = pm.response.headers.get(\"Cache-Control\");\r",
+              "    if (cacheHeader) pm.expect(cacheHeader).to.include(\"max-age\");\r",
+              "});\r",
+              "\r",
+              "pm.test(\"В ответе есть поле products - массив\", function () {\r",
+              "    let jsonData = pm.response.json();\r",
+              "    pm.expect(jsonData).to.have.property(\"products\").that.is.an(\"array\").that.is.not.empty;\r",
+              "});\r",
+              "\r",
+              "// Authorization\r",
+              "// (Место для кода или переменных, связанных с авторизацией)\r",
+              "\r",
+              "// Cookies\r",
+              "// (Место для кода или переменных, связанных с куки)"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Cache-Control",
+            "value": "max-age=180",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/products?limit=10",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "products"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "10"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET - один продукт по id",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Статус 200\", () => pm.response.to.have.status(200));\r",
+              "\r",
+              "pm.test(\"Есть id, title, price, category\", () => {\r",
+              "    let json = pm.response.json();\r",
+              "    pm.expect(json.id).to.equal(1);\r",
+              "    pm.expect(json).to.have.property(\"title\").that.is.a(\"string\");\r",
+              "    pm.expect(json).to.have.property(\"price\").that.is.a(\"number\");\r",
+              "    pm.expect(json).to.have.property(\"category\");\r",
+              "});\r",
+              "\r",
+              ""
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text",
+            "disabled": true
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/products/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "products",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET - Несуществующий продукт (404)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "\r",
+              "pm.test(\"Ожидаем 404 Not Found\", () => pm.response.to.have.status(404));\r",
+              "\r",
+              "pm.test(\"В теле есть message\", () => {\r",
+              "    let json = pm.response.json();\r",
+              "    pm.expect(json).to.have.property(\"message\");\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text",
+            "disabled": true
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/products/999999",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "products",
+            "999999"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET - Поиск продуктов (q=phone)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Статус 200\", () => pm.response.to.have.status(200));\r",
+              "\r",
+              "pm.test(\"Найдено хотя бы 1 продукт\", () => {\r",
+              "    let json = pm.response.json();\r",
+              "    pm.expect(json.products.length).to.be.at.least(1);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text",
+            "disabled": true
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/products/search?q=phone&limit=5",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "products",
+            "search"
+          ],
+          "query": [
+            {
+              "key": "q",
+              "value": "phone"
+            },
+            {
+              "key": "limit",
+              "value": "5"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST – Добавить новый продукт",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Статус 201 Created\", () => pm.response.to.have.status(201));\r",
+              "\r",
+              "pm.test(\"Вернулся созданный объект с id\", () => {\r",
+              "    let json = pm.response.json();\r",
+              "    pm.expect(json).to.have.property(\"id\").that.is.a(\"number\");\r",
+              "    pm.expect(json.title).to.equal(\"Super Test Phone 2025\");\r",
+              "});\r",
+              "\r",
+              "pm.collectionVariables.set(\"lastCreatedId\", pm.response.json().id);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text",
+            "disabled": true
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"title\": \"Super Test Phone 2025\",\r\n  \"description\": \"Created via Postman practice\",\r\n  \"price\": 899,\r\n  \"brand\": \"PracticeBrand\",\r\n  \"category\": \"smartphones\",\r\n  \"stock\": 42\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/products/add",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "products",
+            "add"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "PUT - Полное обновление продукта",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Статус 200 или 404\", () => {\r",
+              "    pm.expect([200, 404]).to.include(pm.response.code);\r",
+              "});\r",
+              "\r",
+              "if (pm.response.code === 200) {\r",
+              "    let json = pm.response.json();\r",
+              "    pm.test(\"title обновился\", () => pm.expect(json.title).to.equal(\"UPDATED - Super Test Phone\"));\r",
+              "    pm.test(\"price обновился\", () => pm.expect(json.price).to.equal(1299));\r",
+              "} else {\r",
+              "    console.log(\"404 – нормально после DELETE\");\r",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text",
+            "disabled": true
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"title\": \"UPDATED - Super Test Phone\",\r\n  \"description\": \"Fully updated via PUT\",\r\n  \"price\": 1299,\r\n  \"brand\": \"PracticeBrand\",\r\n  \"category\": \"smartphones\",\r\n  \"stock\": 10\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/products/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "products",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "PATCH - Частичное обновление (только price)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Статус 200 или 404\", () => pm.expect([200, 404]).to.include(pm.response.code));\r",
+              "\r",
+              "if (pm.response.code === 200) {\r",
+              "    let json = pm.response.json();\r",
+              "    pm.test(\"price = 1499\", () => pm.expect(json.price).to.equal(1499));\r",
+              "} else {\r",
+              "    console.log(\"404 – нормально после DELETE\");\r",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text",
+            "disabled": true
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"price\": 1499\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/products/1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "products",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "DELETE - Попытка удалить несуществующий продукт",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Ожидаем 404\", () => pm.response.to.have.status(404));"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text",
+            "disabled": true
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"price\": 1499\r\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/products/999999999",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "products",
+            "999999999"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST - Некорректный JSON (400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Ожидаем 400 Bad Request\", () => pm.response.to.have.status(400));\r",
+              "\r",
+              "pm.test(\"Есть message\", () => pm.expect(pm.response.json()).to.have.property(\"message\"));"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text",
+            "disabled": true
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"title\": \"Bad json\",\r\n  \"price\": 100, \r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/products/add",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "products",
+            "add"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET - Запрос с неверным методом (симуляция 405)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"405 или 404/200 (API может не строго проверять)\", () => {\r",
+              "    pm.expect([405, 404, 200]).to.include(pm.response.code);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text",
+            "disabled": true
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"title\": \"Bad json\",\r\n  \"price\": 100, \r\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/products",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "products"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET - Продукты с лимитом и skip (пагинация)",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text",
+            "disabled": true
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text",
+            "disabled": true
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"title\": \"Bad json\",\r\n  \"price\": 100, \r\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/products?limit=5&skip=10",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "products"
+          ],
+          "query": [
+            {
+              "key": "limit",
+              "value": "5"
+            },
+            {
+              "key": "skip",
+              "value": "10"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET - Продукты по категории (smartphones)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Статус 200\", () => pm.response.to.have.status(200));\r",
+              "\r",
+              "pm.test(\"Все продукты – smartphones\", () => {\r",
+              "    pm.response.json().products.forEach(p => {\r",
+              "        pm.expect(p.category).to.equal(\"smartphones\");\r",
+              "    });\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Есть хотя бы 1 продукт\", () => {\r",
+              "    pm.expect(pm.response.json().products.length).to.be.above(0);\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache",
+            "type": "text",
+            "disabled": true
+          },
+          {
+            "key": "Accept-Language",
+            "value": "ru-RU,;q=0.9,en;q=0.8",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text",
+            "disabled": true
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"title\": \"Bad json\",\r\n  \"price\": 100, \r\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/products/category/smartphones",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "products",
+            "category",
+            "smartphones"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET - Имитация 429",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Ожидаем 429 или хотя бы 4xx/5xx\", () => {\r",
+              "    pm.expect([429, 400, 401, 403, 404, 429, 500, 502, 503, 504]).to.include(pm.response.code);\r",
+              "});\r",
+              "\r",
+              "if (pm.response.headers.has(\"Retry-After\")) {\r",
+              "    console.log(\"Retry-After: \" + pm.response.headers.get(\"Retry-After\"));\r",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "https://dummyjson.com/http/429",
+          "protocol": "https",
+          "host": [
+            "dummyjson",
+            "com"
+          ],
+          "path": [
+            "http",
+            "429"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET - Долгий ответ (delay=5000 мс) для тренировки timeout",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Статус 200\", () => pm.response.to.have.status(200));\r",
+              "\r",
+              "pm.test(\"Время ответа > 4500 мс\", () => {\r",
+              "    pm.expect(pm.response.responseTime).to.be.above(4500);\r",
+              "    console.log(`Время: ${pm.response.responseTime} мс`);\r",
+              "});\r",
+              "\r",
+              "pm.test(\"Есть продукты\", () => {\r",
+              "    pm.expect(pm.response.json()).to.have.property(\"products\").that.is.an(\"array\");\r",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text",
+            "disabled": true
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text",
+            "disabled": true
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"title\": \"Bad json\",\r\n  \"price\": 100, \r\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/products?delay=5000&limit=1",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "products"
+          ],
+          "query": [
+            {
+              "key": "delay",
+              "value": "5000"
+            },
+            {
+              "key": "limit",
+              "value": "1"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": ""
+    },
+    {
+      "key": "lastCreatedId",
+      "value": ""
+    }
+  ]
+}
